@@ -26,6 +26,10 @@
         "conceptText": { "type": "string" },
         "conceptImageUrl": { "type": "string", "format": "uri" },
         "heroImageUrl": { "type": "string", "format": "uri" },
+        "logoUrl": { "type": "string", "format": "uri" },
+        "faviconUrl": { "type": "string", "format": "uri" },
+        "seoTitle": { "type": "string" },
+        "seoDescription": { "type": "string" },
         "whatsappNumber": { "type": "string" },
         "orderEmail": { "type": "string" }
       }

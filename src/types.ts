@@ -20,6 +20,8 @@ export interface SiteConfig {
   heroImageUrl?: string;
   logoUrl?: string;
   faviconUrl?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   whatsappNumber: string;
   orderEmail: string;
 }

@@ -4,11 +4,13 @@ import { Hero } from "@/src/components/Hero";
 import { Concept } from "@/src/components/Concept";
 import { Gallery } from "@/src/components/Gallery";
 import { WorkGallery } from "@/src/components/WorkGallery";
+import { WhatsAppFloating } from "@/src/components/WhatsAppFloating";
 import { CustomizerModal } from "@/src/components/CustomizerModal";
 import { Footer } from "@/src/components/Footer";
 import { Template, SiteConfig } from "@/src/types";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/src/lib/firebase";
+import { Helmet } from "react-helmet-async";
 
 export default function Home() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -37,6 +39,10 @@ export default function Home() {
 
   return (
     <div className="bordered-container bg-stone">
+      <Helmet>
+        <title>{config?.seoTitle || "HUROOF | Art Collective"}</title>
+        <meta name="description" content={config?.seoDescription || "Sacred calligraphy art for your home."} />
+      </Helmet>
       <Header config={config} />
       <main>
         <Hero config={config} />
@@ -45,6 +51,7 @@ export default function Home() {
         <WorkGallery />
       </main>
       <Footer config={config} />
+      <WhatsAppFloating config={config} />
       
       <CustomizerModal 
         template={selectedTemplate} 

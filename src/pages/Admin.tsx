@@ -6,6 +6,7 @@ import { db, storage, auth, googleProvider, handleFirestoreError } from "@/src/l
 import { Template, Category, WorkImage } from "@/src/types";
 import { motion, AnimatePresence } from "motion/react";
 import { Trash2, Plus, LogOut, Image as ImageIcon, Loader2, Grid } from "lucide-react";
+import imageCompression from "browser-image-compression";
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -124,6 +125,24 @@ export default function Admin() {
   };
 
   const uploadImage = async (file: File, oldUrl?: string): Promise<string> => {
+    // 0. Image Optimization
+    const options = {
+      maxSizeMB: 0.8, // Max 800KB
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+      initialQuality: 0.85
+    };
+    
+    let fileToUpload = file;
+    try {
+      // Don't compress if file is already small
+      if (file.size > 200 * 1024) {
+        fileToUpload = await imageCompression(file, options);
+      }
+    } catch (error) {
+      console.warn("Image compression failed, using original:", error);
+    }
+
     // 1. Cleanup old image if it exists
     if (oldUrl && oldUrl.includes("public.blob.vercel-storage.com")) {
       await fetch("/api/delete", {
@@ -135,7 +154,7 @@ export default function Admin() {
 
     // 2. Upload new image
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", fileToUpload);
     
     const response = await fetch("/api/upload", {
       method: "POST",
@@ -256,20 +275,8 @@ export default function Admin() {
 
     setLoading(true);
     try {
-      // 1. Upload to Vercel Blob via API
-      const formData = new FormData();
-      formData.append("file", newFile);
-      
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Upload failed");
-      }
-      const { url } = await response.json();
+      // 1. Upload to Vercel Blob (via optimized helper)
+      const url = await uploadImage(newFile);
 
       // 2. Save metadata to Firestore
       const priceVal = parseFloat(newPrice);
@@ -515,6 +522,25 @@ export default function Admin() {
                       />
                     </label>
                   </div>
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">SEO Title</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-3 bg-emerald-deep/5 rounded-xl border-none outline-none focus:ring-1 ring-gold"
+                    value={config.seoTitle || ""}
+                    placeholder="HUROOF | Art Collective"
+                    onChange={(e) => setConfig({...config, seoTitle: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">SEO Description</label>
+                  <textarea 
+                    className="w-full px-4 py-3 bg-emerald-deep/5 rounded-xl border-none outline-none focus:ring-1 ring-gold min-h-[80px]"
+                    value={config.seoDescription || ""}
+                    placeholder="Sacred calligraphy art for your home."
+                    onChange={(e) => setConfig({...config, seoDescription: e.target.value})}
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
