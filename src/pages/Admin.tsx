@@ -226,7 +226,7 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fcfbf7]">
+    <div className="min-h-screen bg-stone">
       <nav className="bg-emerald-deep text-white px-12 py-6 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <LayoutDashboard size={24} className="text-gold" />
@@ -373,7 +373,7 @@ export default function Admin() {
                   exit={{ opacity: 0 }}
                   className="bg-white p-6 rounded-2xl shadow-sm border border-gold/10 group flex flex-col"
                 >
-                  <div className="relative aspect-square bg-cream rounded-xl overflow-hidden mb-6 flex items-center justify-center p-4">
+                  <div className="relative aspect-square bg-cream/50 rounded-xl overflow-hidden mb-6 flex items-center justify-center p-4">
                     <img 
                       src={template.imageUrl} 
                       alt={template.name}

@@ -7,13 +7,14 @@
 
   --color-emerald-deep: #064E3B;
   --color-gold: #D4AF37;
-  --color-stone: #F9F6F2;
+  --color-stone: #F7F3EB;
+  --color-cream: #FEFDFB;
   --color-ink: #1A1A1A;
 }
 
 @layer base {
   body {
-    @apply bg-stone text-ink font-sans antialiased;
+    @apply bg-cream text-ink font-sans antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {

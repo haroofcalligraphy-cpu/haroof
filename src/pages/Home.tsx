@@ -49,7 +49,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bordered-container bg-stone">
+    <div className="bordered-container bg-cream">
       <Helmet>
         <title>{config?.seoTitle || "HUROOF | Art Collective"}</title>
         <meta name="description" content={config?.seoDescription || "Sacred calligraphy art for your home."} />

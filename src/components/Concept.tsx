@@ -7,7 +7,7 @@ interface ConceptProps {
 
 export function Concept({ config }: ConceptProps) {
   return (
-    <section id="concept" className="py-24 bg-white">
+    <section id="concept" className="py-24 bg-stone/30">
       <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
