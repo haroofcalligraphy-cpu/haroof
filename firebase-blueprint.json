@@ -9,6 +9,7 @@
         "name": { "type": "string" },
         "category": { "type": "string", "enum": ["Islamic", "Name", "Wedding"] },
         "imageUrl": { "type": "string", "format": "uri" },
+        "storagePath": { "type": "string" },
         "description": { "type": "string" },
         "price": { "type": "number" },
         "createdAt": { "type": "number" }

@@ -8,6 +8,7 @@ export interface Template {
   description?: string;
   price?: number;
   createdAt: number;
+  storagePath?: string;
 }
 
 export interface SiteConfig {

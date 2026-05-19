@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { collection, onSnapshot, query, addDoc, deleteDoc, doc, serverTimestamp } from "firebase/firestore";
+import { useState, useEffect, type FormEvent } from "react";
+import { collection, onSnapshot, query, addDoc, deleteDoc, doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { db, storage } from "@/src/lib/firebase";
+import { signInAnonymously } from "firebase/auth";
+import { db, storage, auth, handleFirestoreError } from "@/src/lib/firebase";
 import { Template, Category } from "@/src/types";
 import { motion, AnimatePresence } from "motion/react";
 import { Trash2, Plus, LogOut, Image as ImageIcon, Loader2 } from "lucide-react";
@@ -11,6 +12,7 @@ export default function Admin() {
   const [password, setPassword] = useState("");
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   
   // Form state for Site Config
   const [config, setConfig] = useState<any>(null);
@@ -18,10 +20,12 @@ export default function Admin() {
 
   // Form state for Templates
   const [newName, setNewName] = useState("");
+  const [newPrice, setNewPrice] = useState("149");
   const [newCategory, setNewCategory] = useState<Category>("Islamic");
   const [newFile, setNewFile] = useState<File | null>(null);
 
-  const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+  // @ts-ignore
+  const adminPassword = (import.meta as any).env.VITE_ADMIN_PASSWORD || "admin123";
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -34,8 +38,10 @@ export default function Admin() {
           heroTitle: "Every Letter Tells a Story",
           heroSubtitle: "Preserve memories, love, and faith through timeless premium calligraphy gift frames.",
           conceptText: "We believe that every letter is a vessel for emotion...",
-          whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || "",
-          orderEmail: import.meta.env.VITE_ORDER_EMAIL || ""
+          // @ts-ignore
+          whatsappNumber: (import.meta as any).env.VITE_WHATSAPP_NUMBER || "",
+          // @ts-ignore
+          orderEmail: (import.meta as any).env.VITE_ORDER_EMAIL || ""
         });
       }
     });
@@ -55,16 +61,22 @@ export default function Admin() {
     };
   }, [isAuthenticated]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     if (password === adminPassword) {
-      setIsAuthenticated(true);
+      try {
+        await signInAnonymously(auth);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error("Auth error:", err);
+        alert("Failed to authenticate with Firebase");
+      }
     } else {
       alert("Invalid password");
     }
   };
 
-  const handleSaveConfig = async (e: React.FormEvent) => {
+  const handleSaveConfig = async (e: FormEvent) => {
     e.preventDefault();
     if (!config) return;
     setIsSavingConfig(true);
@@ -79,7 +91,7 @@ export default function Admin() {
     }
   };
 
-  const handleUpload = async (e: React.FormEvent) => {
+  const handleUpload = async (e: FormEvent) => {
     e.preventDefault();
     if (!newFile || !newName) return;
 
@@ -93,32 +105,39 @@ export default function Admin() {
         name: newName,
         category: newCategory,
         imageUrl: url,
+        price: Number(newPrice),
         createdAt: Date.now(),
-        storagePath: storageRef.fullPath // helpful for deletion
+        storagePath: storageRef.fullPath
       });
 
       setNewName("");
+      setNewPrice("149");
       setNewFile(null);
     } catch (err) {
-      console.error(err);
-      alert("Upload failed");
+      // @ts-ignore
+      handleFirestoreError(err, "write", "templates");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (template: Template & { storagePath?: string }) => {
-    if (!window.confirm("Delete this template?")) return;
+  const handleDelete = async (template: Template) => {
+    if (!window.confirm(`Are you sure you want to delete "${template.name}"? This action cannot be undone and will remove the image from storage.`)) return;
 
+    setDeletingId(template.id);
     try {
       if (template.storagePath) {
         const storageRef = ref(storage, template.storagePath);
-        await deleteObject(storageRef);
+        await deleteObject(storageRef).catch(err => {
+          console.warn("Storage deletion error (might already be gone):", err);
+        });
       }
       await deleteDoc(doc(db, "templates", template.id));
     } catch (err) {
-      console.error(err);
-      alert("Delete failed");
+      // @ts-ignore
+      handleFirestoreError(err, "delete", `templates/${template.id}`);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -233,6 +252,17 @@ export default function Admin() {
                 />
               </div>
               <div>
+                <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Starting Price ($)</label>
+                <input 
+                  type="number"
+                  required
+                  placeholder="149"
+                  className="w-full px-4 py-3 bg-emerald-deep/5 rounded-xl border-none outline-none focus:ring-1 ring-gold"
+                  value={newPrice}
+                  onChange={(e) => setNewPrice(e.target.value)}
+                />
+              </div>
+              <div>
                 <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Category</label>
                 <select 
                   className="w-full px-4 py-3 bg-emerald-deep/5 rounded-xl border-none outline-none focus:ring-1 ring-gold"
@@ -300,10 +330,15 @@ export default function Admin() {
                       </div>
                       <button 
                         onClick={() => handleDelete(t)}
-                        className="flex items-center gap-2 text-xs font-bold text-red-500 hover:text-red-700 transition-colors"
+                        disabled={deletingId === t.id}
+                        className="flex items-center gap-2 text-xs font-bold text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
                       >
-                        <Trash2 size={14} />
-                        <span>Remove Item</span>
+                        {deletingId === t.id ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Trash2 size={14} />
+                        )}
+                        <span>{deletingId === t.id ? "Removing..." : "Remove Item"}</span>
                       </button>
                     </div>
                   </motion.div>
