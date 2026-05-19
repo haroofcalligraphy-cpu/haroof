@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -13,8 +14,10 @@ async function startServer() {
   // Add API upload route
   app.post("/api/upload", upload.single("file"), async (req, res) => {
     try {
-      if (!process.env.BLOB_READ_WRITE_TOKEN) {
-        return res.status(500).json({ error: "Vercel Blob token (BLOB_READ_WRITE_TOKEN) is not configured in environment variables." });
+      const token = process.env.BLOB_READ_WRITE_TOKEN;
+      if (!token) {
+        console.error("Upload failed: BLOB_READ_WRITE_TOKEN is missing");
+        return res.status(500).json({ error: "Vercel Blob token is missing. Please add BLOB_READ_WRITE_TOKEN to your secrets." });
       }
 
       const file = req.file;

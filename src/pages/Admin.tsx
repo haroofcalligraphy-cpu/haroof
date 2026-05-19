@@ -118,7 +118,13 @@ export default function Admin() {
 
       if (!uploadRes.ok) {
         const errorData = await uploadRes.json().catch(() => ({}));
-        throw new Error(errorData.error || "Image upload failed");
+        let errorMessage = errorData.error || "Image upload failed";
+        
+        if (errorMessage.includes("token is missing")) {
+          errorMessage = "Vercel Blob token is missing. Please go to Settings -> Secrets in AI Studio and add BLOB_READ_WRITE_TOKEN.";
+        }
+        
+        throw new Error(errorMessage);
       }
       
       const { url: imageUrl } = await uploadRes.json();
