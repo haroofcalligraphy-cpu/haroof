@@ -14,26 +14,32 @@ async function startServer() {
   // Add API upload route
   app.post("/api/upload", upload.single("file"), async (req, res) => {
     try {
-      const token = process.env.BLOB_READ_WRITE_TOKEN;
+      const token = process.env.BLOB_READ_WRITE_TOKEN?.trim().replace(/^["']|["']$/g, '');
       if (!token) {
-        console.error("Upload failed: BLOB_READ_WRITE_TOKEN is missing");
-        return res.status(500).json({ error: "Vercel Blob token is missing. Please add BLOB_READ_WRITE_TOKEN to your secrets." });
+        console.error("Upload failed: BLOB_READ_WRITE_TOKEN is missing or empty");
+        return res.status(500).json({ error: "Vercel Blob token is missing. Please add BLOB_READ_WRITE_TOKEN to your secrets in AI Studio." });
       }
 
       const file = req.file;
       if (!file) {
-        return res.status(400).json({ error: "No file uploaded" });
+        console.error("Upload failed: No file in request");
+        return res.status(400).json({ error: "No file uploaded in the request. Please select an image." });
       }
 
-      const { url } = await put(file.originalname, file.buffer, {
+      console.log(`Starting upload for file: ${file.originalname} (${file.size} bytes)`);
+
+      const filename = `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      
+      const blob = await put(filename, file.buffer, {
         access: 'public',
-        token: process.env.BLOB_READ_WRITE_TOKEN,
+        token: token,
       });
 
-      res.json({ url });
+      console.log("Upload successful:", blob.url);
+      res.json({ url: blob.url });
     } catch (error: any) {
-      console.error("Upload error details:", error);
-      const message = error?.message || "Internal server error during upload";
+      console.error("Vercel Blob Upload Error:", error);
+      const message = error?.message || "Internal server error during upload to Vercel Blob";
       res.status(500).json({ error: message });
     }
   });
