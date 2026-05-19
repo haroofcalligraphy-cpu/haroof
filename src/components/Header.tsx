@@ -11,17 +11,22 @@ interface HeaderProps {
 export function Header({ config }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
+  const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
 
   const handleLogoClick = () => {
+    if (clickTimeout) clearTimeout(clickTimeout);
+    
     const newCount = logoClicks + 1;
     if (newCount >= 5) {
       navigate("/admin");
       setLogoClicks(0);
     } else {
       setLogoClicks(newCount);
-      // Reset clicks after 2 seconds of inactivity
-      setTimeout(() => setLogoClicks(0), 2000);
+      const timeout = setTimeout(() => {
+        setLogoClicks(0);
+      }, 3000); // 3 seconds window to complete 5 clicks
+      setClickTimeout(timeout);
     }
   };
 

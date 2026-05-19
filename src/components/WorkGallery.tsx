@@ -58,9 +58,10 @@ export function WorkGallery() {
               images.map((image) => (
                 <motion.div
                   key={image.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
                   className="aspect-square rounded-2xl overflow-hidden cursor-pointer group relative"
                   onClick={() => setSelectedImage(image.imageUrl)}
                 >

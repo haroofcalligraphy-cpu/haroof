@@ -84,8 +84,9 @@ export function Gallery({ onSelectTemplate }: GalleryProps) {
                   key={template.id}
                   layout
                   initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.5 }}
                   className="bg-white p-6 shadow-sm border border-gold/10 flex flex-col items-center group cursor-pointer"
                   onClick={() => onSelectTemplate(template)}
                 >
