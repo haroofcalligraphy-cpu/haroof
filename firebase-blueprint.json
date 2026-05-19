@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "Template": {
+      "title": "Calligraphy Template",
+      "description": "Store images and metadata for calligraphy gift frames",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string", "enum": ["Islamic", "Name", "Wedding"] },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "name", "category", "imageUrl", "createdAt"]
+    },
+    "Config": {
+      "title": "Site Configuration",
+      "description": "Dynamic text and contact details for the website",
+      "type": "object",
+      "properties": {
+        "heroTitle": { "type": "string" },
+        "heroSubtitle": { "type": "string" },
+        "conceptText": { "type": "string" },
+        "whatsappNumber": { "type": "string" },
+        "orderEmail": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/templates/{templateId}": {
+      "schema": "Template",
+      "description": "Collection of calligraphy designs"
+    },
+    "/config/site": {
+      "schema": "Config",
+      "description": "Global website configuration"
+    }
+  }
+}

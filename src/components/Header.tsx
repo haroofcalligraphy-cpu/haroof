@@ -1,0 +1,52 @@
+import { motion } from "motion/react";
+import { ShoppingBag, Menu, X } from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/src/lib/utils";
+
+export function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <header className="sticky top-0 left-0 right-0 z-50 bg-stone/80 backdrop-blur-md border-b border-gold/20">
+      <div className="max-w-7xl mx-auto px-12 h-24 flex items-center justify-between">
+        <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-[0.2em] font-semibold text-emerald-deep/60">
+          <a href="#gallery" className="hover:text-emerald-deep transition-colors">Gallery</a>
+          <a href="#concept" className="hover:text-emerald-deep transition-colors">Process</a>
+        </div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-4xl md:text-5xl font-serif tracking-[0.1em] text-emerald-deep font-medium"
+        >
+          HAROOF
+        </motion.div>
+
+        <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-[0.2em] font-semibold text-emerald-deep/60">
+          <a href="#footer" className="hover:text-emerald-deep transition-colors">Contact</a>
+          <a href="/admin" className="hover:text-emerald-deep border-b border-emerald-deep">Admin</a>
+        </div>
+
+        <div className="md:hidden flex items-center gap-4">
+          <button onClick={() => setIsOpen(!isOpen)} className="text-emerald-deep">
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <motion.div
+        initial={false}
+        animate={isOpen ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
+        className="md:hidden overflow-hidden bg-stone border-t border-gold/10"
+      >
+        <div className="flex flex-col gap-6 p-8 text-center text-[13px] uppercase tracking-widest font-bold text-emerald-deep">
+          <a href="#gallery" onClick={() => setIsOpen(false)}>Gallery</a>
+          <a href="#concept" onClick={() => setIsOpen(false)}>Process</a>
+          <a href="#footer" onClick={() => setIsOpen(false)}>Contact</a>
+          <a href="/admin" onClick={() => setIsOpen(false)}>Admin</a>
+        </div>
+      </motion.div>
+    </header>
+  );
+}

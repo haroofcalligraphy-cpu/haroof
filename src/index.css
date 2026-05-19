@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", "Georgia", serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  --color-emerald-deep: #064E3B;
+  --color-gold: #D4AF37;
+  --color-stone: #F9F6F2;
+  --color-ink: #1A1A1A;
+}
+
+@layer base {
+  body {
+    @apply bg-stone text-ink font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+.luxury-gradient {
+  background: linear-gradient(135deg, #064E3B 0%, #053a2c 100%);
+}
+
+.gold-text {
+  @apply text-gold;
+}
+
+.bordered-container {
+  @apply border-[12px] border-emerald-deep min-h-screen flex flex-col;
+}
+
