@@ -14,13 +14,24 @@ import { Helmet } from "react-helmet-async";
 
 export default function Home() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [config, setConfig] = useState<SiteConfig | null>(null);
+  const [config, setConfig] = useState<SiteConfig>({
+    heroTitle: "Every Letter Tells a Story",
+    heroSubtitle: "Preserve memories, love, and faith through timeless premium calligraphy gift frames.",
+    conceptTitle: "The Art of Huroof",
+    conceptText: "In a world of mass production, HUROOF stands for the sacred beauty of the written word. Each piece is a unique creation, blending traditional script with modern aesthetics.",
+    conceptImageUrl: "",
+    heroImageUrl: "",
+    whatsappNumber: "0000000000", // Generic default
+    orderEmail: "order@huroof.com",
+    seoTitle: "HUROOF | Sacred Calligraphy Art Collective",
+    seoDescription: "Transforming the ancient beauty of calligraphy into personalized art frames for your home and soulful gifts."
+  });
 
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(db, "config", "site"), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data() as SiteConfig;
-        setConfig(data);
+        setConfig(prev => ({ ...prev, ...data }));
         
         // Dynamic Favicon
         if (data.faviconUrl) {
