@@ -29,7 +29,8 @@ export function Header({ config }: HeaderProps) {
     <header className="sticky top-0 left-0 right-0 z-50 bg-stone/80 backdrop-blur-md border-b border-gold/20">
       <div className="max-w-7xl mx-auto px-12 h-24 flex items-center justify-between">
         <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-[0.2em] font-semibold text-emerald-deep/60">
-          <a href="#gallery" className="hover:text-emerald-deep transition-colors">Gallery</a>
+          <a href="#gallery" className="hover:text-emerald-deep transition-colors">Designs</a>
+          <a href="#work-gallery" className="hover:text-emerald-deep transition-colors">Our Work</a>
           <a href="#concept" className="hover:text-emerald-deep transition-colors">Process</a>
         </div>
 
@@ -64,7 +65,8 @@ export function Header({ config }: HeaderProps) {
         className="md:hidden overflow-hidden bg-stone border-t border-gold/10"
       >
         <div className="flex flex-col gap-6 p-8 text-center text-[13px] uppercase tracking-widest font-bold text-emerald-deep">
-          <a href="#gallery" onClick={() => setIsOpen(false)}>Gallery</a>
+          <a href="#gallery" onClick={() => setIsOpen(false)}>Designs</a>
+          <a href="#work-gallery" onClick={() => setIsOpen(false)}>Our Work</a>
           <a href="#concept" onClick={() => setIsOpen(false)}>Process</a>
           <a href="#footer" onClick={() => setIsOpen(false)}>Contact</a>
         </div>

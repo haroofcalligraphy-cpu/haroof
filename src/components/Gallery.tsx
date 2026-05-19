@@ -47,9 +47,9 @@ export function Gallery({ onSelectTemplate }: GalleryProps) {
     <section id="gallery" className="py-24 bg-cream">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-serif text-emerald-deep mb-4">The Collection</h2>
+          <h2 className="text-4xl font-serif text-emerald-deep mb-4">Design Collections</h2>
           <p className="text-ink/60 font-light max-w-xl mx-auto">
-            Choose a foundation for your custom masterpiece. Each template is meticulously balanced for aesthetic perfection.
+            Choose a foundation for your custom masterpiece. Each design is meticulously balanced for aesthetic perfection.
           </p>
         </div>
 

@@ -29,6 +29,17 @@
         "whatsappNumber": { "type": "string" },
         "orderEmail": { "type": "string" }
       }
+    },
+    "WorkImage": {
+      "title": "Work Gallery Image",
+      "description": "Images of completed calligraphy work",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "imageUrl", "createdAt"]
     }
   },
   "firestore": {
@@ -39,6 +50,10 @@
     "/config/site": {
       "schema": "Config",
       "description": "Global website configuration"
+    },
+    "/workGallery/{imageId}": {
+      "schema": "WorkImage",
+      "description": "Gallery of completed works"
     }
   }
 }

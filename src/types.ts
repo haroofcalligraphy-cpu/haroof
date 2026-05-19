@@ -23,3 +23,9 @@ export interface SiteConfig {
   whatsappNumber: string;
   orderEmail: string;
 }
+
+export interface WorkImage {
+  id: string;
+  imageUrl: string;
+  createdAt: number;
+}

@@ -3,6 +3,7 @@ import { Header } from "@/src/components/Header";
 import { Hero } from "@/src/components/Hero";
 import { Concept } from "@/src/components/Concept";
 import { Gallery } from "@/src/components/Gallery";
+import { WorkGallery } from "@/src/components/WorkGallery";
 import { CustomizerModal } from "@/src/components/CustomizerModal";
 import { Footer } from "@/src/components/Footer";
 import { Template, SiteConfig } from "@/src/types";
@@ -41,6 +42,7 @@ export default function Home() {
         <Hero config={config} />
         <Concept config={config} />
         <Gallery onSelectTemplate={(t) => setSelectedTemplate(t)} />
+        <WorkGallery />
       </main>
       <Footer config={config} />
       

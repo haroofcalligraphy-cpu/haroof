@@ -3,16 +3,18 @@ import { collection, onSnapshot, query, addDoc, deleteDoc, doc, setDoc } from "f
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
 import { db, storage, auth, googleProvider, handleFirestoreError } from "@/src/lib/firebase";
-import { Template, Category } from "@/src/types";
+import { Template, Category, WorkImage } from "@/src/types";
 import { motion, AnimatePresence } from "motion/react";
-import { Trash2, Plus, LogOut, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Trash2, Plus, LogOut, Image as ImageIcon, Loader2, Grid } from "lucide-react";
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [workImages, setWorkImages] = useState<WorkImage[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingWorkId, setDeletingWorkId] = useState<string | null>(null);
   
   // Form state for Site Config
   const [config, setConfig] = useState<any>(null);
@@ -68,9 +70,19 @@ export default function Admin() {
       setTemplates(data);
     });
 
+    const workGalleryQuery = query(collection(db, "workGallery"));
+    const workGalleryUnsubscribe = onSnapshot(workGalleryQuery, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as WorkImage));
+      setWorkImages(data.sort((a, b) => b.createdAt - a.createdAt));
+    });
+
     return () => {
       configUnsubscribe();
       templatesUnsubscribe();
+      workGalleryUnsubscribe();
     };
   }, [isAuthenticated]);
 
@@ -190,6 +202,43 @@ export default function Admin() {
       alert(`Favicon upload failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleWorkImageUpload = async (file: File) => {
+    setLoading(true);
+    try {
+      const url = await uploadImage(file);
+      await addDoc(collection(db, "workGallery"), {
+        imageUrl: url,
+        createdAt: Date.now()
+      });
+      alert("Gallery image added!");
+    } catch (err) {
+      alert(`Upload failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteWorkImage = async (image: WorkImage) => {
+    if (!window.confirm("Are you sure you want to delete this gallery image?")) return;
+
+    setDeletingWorkId(image.id);
+    try {
+      if (image.imageUrl && image.imageUrl.includes("public.blob.vercel-storage.com")) {
+        await fetch("/api/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: image.imageUrl }),
+        }).catch(err => console.warn("Blob deletion hint:", err));
+      }
+      await deleteDoc(doc(db, "workGallery", image.id));
+    } catch (err) {
+      // @ts-ignore
+      handleFirestoreError(err, "delete", `workGallery/${image.id}`);
+    } finally {
+      setDeletingWorkId(null);
     }
   };
 
@@ -575,9 +624,63 @@ export default function Admin() {
           </section>
 
           {/* List Section */}
-          <section className="lg:col-span-2 space-y-6">
-            <h2 className="text-xl font-serif mb-2">Live Gallery Items</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <section className="lg:col-span-2 space-y-12">
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-serif">Work Gallery</h2>
+                <label className="flex items-center gap-2 px-4 py-2 bg-emerald-deep text-white text-xs font-bold rounded-xl cursor-pointer hover:bg-emerald-deep/90 transition-all shadow-sm">
+                  {loading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                  <span>Add Work Image</span>
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleWorkImageUpload(file);
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <AnimatePresence>
+                  {workImages.map((image) => (
+                    <motion.div
+                      key={image.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className="group relative aspect-square bg-white rounded-2xl overflow-hidden border border-emerald-deep/5 shadow-sm"
+                    >
+                      <img src={image.imageUrl} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          onClick={() => handleDeleteWorkImage(image)}
+                          disabled={deletingWorkId === image.id}
+                          className="p-3 bg-white rounded-full text-red-500 hover:bg-red-50 hover:scale-110 transition-all shadow-lg overflow-hidden relative"
+                        >
+                          {deletingWorkId === image.id ? (
+                            <Loader2 size={20} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={20} />
+                          )}
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                {workImages.length === 0 && (
+                  <div className="col-span-full py-12 text-center bg-white rounded-3xl border-2 border-dashed border-emerald-deep/5 text-emerald-deep/40 italic font-serif">
+                    No work images uploaded yet.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-serif mb-6">Live Templates</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <AnimatePresence>
                 {templates.map((t) => (
                   <motion.div 
@@ -618,9 +721,10 @@ export default function Admin() {
                 </div>
               )}
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </div>
     </div>
-  );
+  </div>
+);
 }
