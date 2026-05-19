@@ -119,8 +119,8 @@ export default function Admin() {
       setConfig({ ...config, conceptImageUrl: url });
       alert("Concept image uploaded! Remember to save settings.");
     } catch (err) {
-      console.error(err);
-      alert("Image upload failed");
+      console.error("Config upload error:", err);
+      alert(`Config upload failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setLoading(false);
     }
@@ -148,9 +148,10 @@ export default function Admin() {
       setNewName("");
       setNewPrice("149");
       setNewFile(null);
+      alert("Template uploaded successfully!");
     } catch (err) {
-      // @ts-ignore
-      handleFirestoreError(err, "write", "templates");
+      console.error("Template upload error:", err);
+      alert(`Upload failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setLoading(false);
     }

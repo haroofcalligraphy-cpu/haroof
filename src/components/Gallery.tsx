@@ -21,8 +21,7 @@ export function Gallery({ onSelectTemplate }: GalleryProps) {
     try {
       const q = query(
         collection(db, "templates"),
-        where("category", "==", activeCategory),
-        orderBy("createdAt", "desc")
+        where("category", "==", activeCategory)
       );
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
