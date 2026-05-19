@@ -16,16 +16,17 @@ export function CustomizerModal({ template, config, onClose }: CustomizerModalPr
   if (!template) return null;
 
   const handleWhatsApp = () => {
-    const text = encodeURIComponent(`*New Order from HAROOF*\n\n*Template:* ${template.name} (${template.id})\n*Category:* ${template.category}\n*Custom Text:* ${customText}\n*Instructions:* ${instructions}\n\n*Reference Image:* ${template.imageUrl}`);
+    const text = encodeURIComponent(`*New Order from HUROOF*\n\n*Template:* ${template.name} (${template.id})\n*Category:* ${template.category}\n*Custom Text:* ${customText}\n*Instructions:* ${instructions}\n\n*Reference Image:* ${template.imageUrl}`);
     // @ts-ignore
-    const whatsappNumber = config?.whatsappNumber || (import.meta as any).env.VITE_WHATSAPP_NUMBER;
+    const rawNumber = config?.whatsappNumber || (import.meta as any).env.VITE_WHATSAPP_NUMBER || "";
+    const whatsappNumber = rawNumber.replace(/\D/g, "");
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${text}`;
     window.open(whatsappUrl, "_blank");
   };
 
   const handleEmail = () => {
     const subject = encodeURIComponent(`New Order: ${template.name}`);
-    const body = encodeURIComponent(`New Order from HAROOF\n\nTemplate: ${template.name} (${template.id})\nCategory: ${template.category}\nCustom Text: ${customText}\nInstructions: ${instructions}\n\nReference Image: ${template.imageUrl}`);
+    const body = encodeURIComponent(`New Order from HUROOF\n\nTemplate: ${template.name} (${template.id})\nCategory: ${template.category}\nCustom Text: ${customText}\nInstructions: ${instructions}\n\nReference Image: ${template.imageUrl}`);
     // @ts-ignore
     const orderEmail = config?.orderEmail || (import.meta as any).env.VITE_ORDER_EMAIL;
     window.location.href = `mailto:${orderEmail}?subject=${subject}&body=${body}`;

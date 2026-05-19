@@ -32,7 +32,7 @@ export function Hero({ config }: HeroProps) {
             “{config?.heroTitle || "Every letter is a prayer, every frame a memory."}”
           </h1>
           <p className="text-sm md:text-base text-emerald-deep/70 max-w-lg mx-auto leading-relaxed mb-12">
-            {config?.heroSubtitle || "Haroof transforms the ancient beauty of calligraphy into personalized art. Whether celebrating a union, a name, or a verse, we craft vessels for your most profound emotions."}
+            {config?.heroSubtitle || "Huroof transforms the ancient beauty of calligraphy into personalized art. Whether celebrating a union, a name, or a verse, we craft vessels for your most profound emotions."}
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8">

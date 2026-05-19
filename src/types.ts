@@ -9,6 +9,7 @@ export interface Template {
   price?: number;
   createdAt: number;
   storagePath?: string;
+  blobUrl?: string;
 }
 
 export interface SiteConfig {

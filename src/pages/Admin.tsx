@@ -48,7 +48,7 @@ export default function Admin() {
         setConfig({
           heroTitle: "Every Letter Tells a Story",
           heroSubtitle: "Preserve memories, love, and faith through timeless premium calligraphy gift frames.",
-          conceptText: "In a world of mass production, HAROOF stands for the sacred beauty of the written word...",
+          conceptText: "In a world of mass production, HUROOF stands for the sacred beauty of the written word...",
           conceptImageUrl: "",
           heroImageUrl: "",
           // @ts-ignore
@@ -114,9 +114,27 @@ export default function Admin() {
   const handleConceptImageUpload = async (file: File) => {
     setLoading(true);
     try {
-      const storageRef = ref(storage, `site/concept_${Date.now()}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
+      // 1. Cleanup old image if it exists
+      if (config.conceptImageUrl && config.conceptImageUrl.includes("public.blob.vercel-storage.com")) {
+        await fetch("/api/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: config.conceptImageUrl }),
+        }).catch(err => console.warn("Blob deletion hint:", err));
+      }
+
+      // 2. Upload new image
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+      
+      const { url } = await response.json();
       setConfig({ ...config, conceptImageUrl: url });
       alert("Concept image uploaded! Remember to save settings.");
     } catch (err) {
@@ -130,9 +148,27 @@ export default function Admin() {
   const handleHeroImageUpload = async (file: File) => {
     setLoading(true);
     try {
-      const storageRef = ref(storage, `site/hero_${Date.now()}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
+      // 1. Cleanup old image if it exists
+      if (config.heroImageUrl && config.heroImageUrl.includes("public.blob.vercel-storage.com")) {
+        await fetch("/api/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: config.heroImageUrl }),
+        }).catch(err => console.warn("Blob deletion hint:", err));
+      }
+
+      // 2. Upload new image
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+      
+      const { url } = await response.json();
       setConfig({ ...config, heroImageUrl: url });
       alert("Hero background uploaded! Remember to save settings.");
     } catch (err) {
@@ -145,29 +181,48 @@ export default function Admin() {
 
   const handleUpload = async (e: FormEvent) => {
     e.preventDefault();
-    if (!newFile || !newName) return;
+    
+    if (!newFile) {
+      alert("Please select an image file.");
+      return;
+    }
+    if (!newName.trim()) {
+      alert("Please enter a template name.");
+      return;
+    }
 
     setLoading(true);
     try {
-      const storageRef = ref(storage, `templates/${Date.now()}_${newFile.name}`);
-      await uploadBytes(storageRef, newFile);
-      const url = await getDownloadURL(storageRef);
+      // 1. Upload to Vercel Blob via API
+      const formData = new FormData();
+      formData.append("file", newFile);
+      
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-      await addDoc(collection(db, "templates"), {
-        name: newName,
+      if (!response.ok) throw new Error("Upload failed");
+      const { url } = await response.json();
+
+      // 2. Save metadata to Firestore
+      const priceVal = parseFloat(newPrice);
+      const templateData = {
+        name: newName.trim(),
         category: newCategory,
         imageUrl: url,
-        price: Number(newPrice),
+        price: isNaN(priceVal) ? 149 : priceVal,
         createdAt: Date.now(),
-        storagePath: storageRef.fullPath
-      });
+        blobUrl: url // Keeping track for deletion if needed
+      };
+
+      await addDoc(collection(db, "templates"), templateData);
 
       setNewName("");
       setNewPrice("149");
       setNewFile(null);
       alert("Template uploaded successfully!");
     } catch (err) {
-      console.error("Template upload error:", err);
       alert(`Upload failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setLoading(false);
@@ -175,16 +230,20 @@ export default function Admin() {
   };
 
   const handleDelete = async (template: Template) => {
-    if (!window.confirm(`Are you sure you want to delete "${template.name}"? This action cannot be undone and will remove the image from storage.`)) return;
+    if (!window.confirm(`Are you sure you want to delete "${template.name}"?`)) return;
 
     setDeletingId(template.id);
     try {
-      if (template.storagePath) {
-        const storageRef = ref(storage, template.storagePath);
-        await deleteObject(storageRef).catch(err => {
-          console.warn("Storage deletion error (might already be gone):", err);
-        });
+      // 1. Delete from Vercel Blob if URL exists
+      if (template.imageUrl && template.imageUrl.includes("public.blob.vercel-storage.com")) {
+        await fetch("/api/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: template.imageUrl }),
+        }).catch(err => console.warn("Blob deletion hint:", err));
       }
+      
+      // 2. Delete from Firestore
       await deleteDoc(doc(db, "templates", template.id));
     } catch (err) {
       // @ts-ignore
@@ -212,7 +271,7 @@ export default function Admin() {
         >
           <div className="mb-8">
             <h1 className="text-3xl font-serif text-emerald-deep mb-2">Admin Access</h1>
-            <p className="text-ink/40 text-sm uppercase tracking-widest font-bold">HAROOF PORTAL</p>
+            <p className="text-ink/40 text-sm uppercase tracking-widest font-bold">HUROOF PORTAL</p>
           </div>
           
           <p className="text-emerald-deep/60 text-sm mb-8">
@@ -361,9 +420,10 @@ export default function Admin() {
                 </div>
                 <button 
                   disabled={isSavingConfig || loading}
-                  className="w-full py-4 bg-gold text-white font-bold rounded-xl hover:bg-gold/90 transition-all disabled:opacity-50 shadow-lg"
+                  className="w-full py-4 bg-gradient-to-r from-gold via-gold/80 to-gold text-white font-bold rounded-xl hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all disabled:opacity-50 active:scale-[0.98] relative overflow-hidden group shadow-lg"
                 >
-                  {isSavingConfig ? "Saving..." : "Save All Changes"}
+                  <span className="relative z-10">{isSavingConfig ? "Saving..." : "Save All Changes"}</span>
+                  <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]" />
                 </button>
               </form>
             )}
@@ -434,10 +494,13 @@ export default function Admin() {
               </div>
               <button 
                 disabled={loading}
-                className="w-full py-4 bg-emerald-deep text-white font-bold rounded-xl hover:scale-[1.02] transition-all disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-3"
+                className="w-full py-4 bg-emerald-deep text-white font-bold rounded-xl hover:bg-emerald-deep/90 transition-all disabled:opacity-50 active:scale-[0.98] relative overflow-hidden group shadow-lg flex items-center justify-center gap-3"
               >
-                {loading ? <Loader2 className="animate-spin" /> : <Plus size={20} />}
-                <span>Upload Template</span>
+                <div className="relative z-10 flex items-center gap-3">
+                  {loading ? <Loader2 className="animate-spin" /> : <Plus size={20} />}
+                  <span>Upload Template</span>
+                </div>
+                <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]" />
               </button>
             </form>
           </section>

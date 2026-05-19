@@ -33,7 +33,7 @@ export function Concept({ config }: ConceptProps) {
           className="flex flex-col gap-8"
         >
           <h2 className="text-4xl md:text-5xl font-serif text-emerald-deep">
-            Why <span className="italic">HAROOF?</span>
+            Why <span className="italic">HUROOF?</span>
           </h2>
           <div className="space-y-6 text-lg text-ink/70 font-light leading-relaxed">
             {config?.conceptText ? (
@@ -41,7 +41,7 @@ export function Concept({ config }: ConceptProps) {
             ) : (
               <>
                 <p>
-                  In a world of mass production, <span className="font-bold text-emerald-deep">HAROOF</span> stands for the sacred beauty of the written word. We believe that every letter is a vessel for emotion, a reflection of the soul.
+                  In a world of mass production, <span className="font-bold text-emerald-deep">HUROOF</span> stands for the sacred beauty of the written word. We believe that every letter is a vessel for emotion, a reflection of the soul.
                 </p>
                 <p>
                   Our frames are more than just decoration; they are milestones. Whether it's a name that defines an identity, a verse that guides a soul, or a union that celebrates a lifetime—our calligraphy transforms these moments into enduring masterpieces.

@@ -34,7 +34,7 @@ export function Header() {
           animate={{ opacity: 1, y: 0 }}
           className="text-4xl md:text-5xl font-serif tracking-[0.1em] text-emerald-deep font-medium cursor-pointer select-none active:scale-95 transition-transform"
         >
-          HAROOF
+          HUROOF
         </motion.div>
 
         <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-[0.2em] font-semibold text-emerald-deep/60">

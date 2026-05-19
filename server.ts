@@ -1,10 +1,53 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
+import { put } from "@vercel/blob";
+import multer from "multer";
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  // Add API upload route
+  app.post("/api/upload", upload.single("file"), async (req, res) => {
+    try {
+      const file = req.file;
+      if (!file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const { url } = await put(file.originalname, file.buffer, {
+        access: 'public',
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
+
+      res.json({ url });
+    } catch (error) {
+      console.error("Upload error:", error);
+      res.status(500).json({ error: "Upload failed" });
+    }
+  });
+
+  app.post("/api/delete", express.json(), async (req, res) => {
+    try {
+      const { url } = req.body;
+      if (!url) {
+        return res.status(400).json({ error: "URL is required" });
+      }
+      
+      const { del } = await import("@vercel/blob");
+      await del(url, {
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete error:", error);
+      res.status(500).json({ error: "Delete failed" });
+    }
+  });
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
