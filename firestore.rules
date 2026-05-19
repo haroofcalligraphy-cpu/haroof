@@ -17,6 +17,12 @@ service cloud.firestore {
              data.imageUrl is string && data.imageUrl.size() <= 2000;
     }
 
+    function isAdmin() {
+      return isSignedIn() && 
+             request.auth.token.email == 'haroofcalligraphy@gmail.com' &&
+             request.auth.token.email_verified == true;
+    }
+
     // Default deny
     match /{document=**} {
       allow read, write: if false;
@@ -25,13 +31,13 @@ service cloud.firestore {
     // Templates collection
     match /templates/{templateId} {
       allow read: if true; // Publicly viewable
-      allow create, update, delete: if isSignedIn(); // In production, refine to check admin collection
+      allow create, update, delete: if isAdmin();
     }
 
     // Config collection
     match /config/{configId} {
       allow read: if true;
-      allow write: if isSignedIn();
+      allow write: if isAdmin();
     }
   }
 }
