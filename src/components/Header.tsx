@@ -1,10 +1,24 @@
 import { motion } from "motion/react";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/src/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [logoClicks, setLogoClicks] = useState(0);
+  const navigate = useNavigate();
+
+  const handleLogoClick = () => {
+    const newCount = logoClicks + 1;
+    if (newCount >= 5) {
+      navigate("/admin");
+      setLogoClicks(0);
+    } else {
+      setLogoClicks(newCount);
+      // Reset clicks after 2 seconds of inactivity
+      setTimeout(() => setLogoClicks(0), 2000);
+    }
+  };
 
   return (
     <header className="sticky top-0 left-0 right-0 z-50 bg-stone/80 backdrop-blur-md border-b border-gold/20">
@@ -15,16 +29,16 @@ export function Header() {
         </div>
 
         <motion.div 
+          onClick={handleLogoClick}
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-5xl font-serif tracking-[0.1em] text-emerald-deep font-medium"
+          className="text-4xl md:text-5xl font-serif tracking-[0.1em] text-emerald-deep font-medium cursor-pointer select-none active:scale-95 transition-transform"
         >
           HAROOF
         </motion.div>
 
         <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-[0.2em] font-semibold text-emerald-deep/60">
           <a href="#footer" className="hover:text-emerald-deep transition-colors">Contact</a>
-          <a href="/admin" className="hover:text-emerald-deep border-b border-emerald-deep">Admin</a>
         </div>
 
         <div className="md:hidden flex items-center gap-4">
@@ -44,7 +58,6 @@ export function Header() {
           <a href="#gallery" onClick={() => setIsOpen(false)}>Gallery</a>
           <a href="#concept" onClick={() => setIsOpen(false)}>Process</a>
           <a href="#footer" onClick={() => setIsOpen(false)}>Contact</a>
-          <a href="/admin" onClick={() => setIsOpen(false)}>Admin</a>
         </div>
       </motion.div>
     </header>

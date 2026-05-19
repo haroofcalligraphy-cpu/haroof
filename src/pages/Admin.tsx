@@ -48,7 +48,8 @@ export default function Admin() {
         setConfig({
           heroTitle: "Every Letter Tells a Story",
           heroSubtitle: "Preserve memories, love, and faith through timeless premium calligraphy gift frames.",
-          conceptText: "We believe that every letter is a vessel for emotion...",
+          conceptText: "In a world of mass production, HAROOF stands for the sacred beauty of the written word...",
+          conceptImageUrl: "",
           // @ts-ignore
           whatsappNumber: (import.meta as any).env.VITE_WHATSAPP_NUMBER || "",
           // @ts-ignore
@@ -102,10 +103,26 @@ export default function Admin() {
       await setDoc(doc(db, "config", "site"), config);
       alert("Configuration updated successfully");
     } catch (err) {
-      console.error("Save config error:", err);
-      alert("Failed to update site configuration.");
+      // @ts-ignore
+      handleFirestoreError(err, "write", "config/site");
     } finally {
       setIsSavingConfig(false);
+    }
+  };
+
+  const handleConceptImageUpload = async (file: File) => {
+    setLoading(true);
+    try {
+      const storageRef = ref(storage, `site/concept_${Date.now()}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      setConfig({ ...config, conceptImageUrl: url });
+      alert("Concept image uploaded! Remember to save settings.");
+    } catch (err) {
+      console.error(err);
+      alert("Image upload failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -237,28 +254,72 @@ export default function Admin() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">WhatsApp Number</label>
-                  <input 
-                    type="text"
-                    className="w-full px-4 py-3 bg-emerald-deep/5 rounded-xl border-none outline-none focus:ring-1 ring-gold"
-                    value={config.whatsappNumber}
-                    onChange={(e) => setConfig({...config, whatsappNumber: e.target.value})}
+                  <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Hero Subtitle</label>
+                  <textarea 
+                    className="w-full px-4 py-3 bg-emerald-deep/5 rounded-xl border-none outline-none focus:ring-1 ring-gold min-h-[100px]"
+                    value={config.heroSubtitle}
+                    onChange={(e) => setConfig({...config, heroSubtitle: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Order Email</label>
-                  <input 
-                    type="email"
-                    className="w-full px-4 py-3 bg-emerald-deep/5 rounded-xl border-none outline-none focus:ring-1 ring-gold"
-                    value={config.orderEmail}
-                    onChange={(e) => setConfig({...config, orderEmail: e.target.value})}
+                  <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Concept Text (Markdown supported)</label>
+                  <textarea 
+                    className="w-full px-4 py-3 bg-emerald-deep/5 rounded-xl border-none outline-none focus:ring-1 ring-gold min-h-[150px]"
+                    value={config.conceptText}
+                    onChange={(e) => setConfig({...config, conceptText: e.target.value})}
                   />
                 </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Concept Section Image</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-xl bg-emerald-deep/5 overflow-hidden border border-gold/20 shrink-0">
+                      {config.conceptImageUrl ? (
+                        <img src={config.conceptImageUrl} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-emerald-deep/20">
+                          <ImageIcon size={20} />
+                        </div>
+                      )}
+                    </div>
+                    <label className="flex-1 px-4 py-2 border border-gold/30 rounded-xl text-xs font-bold text-emerald-deep cursor-pointer hover:bg-gold/5 transition-all text-center">
+                      Change Image
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleConceptImageUpload(file);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">WhatsApp</label>
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-3 bg-emerald-deep/5 rounded-xl border-none outline-none focus:ring-1 ring-gold text-sm"
+                      value={config.whatsappNumber}
+                      onChange={(e) => setConfig({...config, whatsappNumber: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Email</label>
+                    <input 
+                      type="email"
+                      className="w-full px-4 py-3 bg-emerald-deep/5 rounded-xl border-none outline-none focus:ring-1 ring-gold text-sm"
+                      value={config.orderEmail}
+                      onChange={(e) => setConfig({...config, orderEmail: e.target.value})}
+                    />
+                  </div>
+                </div>
                 <button 
-                  disabled={isSavingConfig}
-                  className="w-full py-4 border border-gold text-gold font-bold rounded-xl hover:bg-gold hover:text-white transition-all disabled:opacity-50"
+                  disabled={isSavingConfig || loading}
+                  className="w-full py-4 bg-gold text-white font-bold rounded-xl hover:bg-gold/90 transition-all disabled:opacity-50 shadow-lg"
                 >
-                  {isSavingConfig ? "Saving..." : "Update Settings"}
+                  {isSavingConfig ? "Saving..." : "Save All Changes"}
                 </button>
               </form>
             )}

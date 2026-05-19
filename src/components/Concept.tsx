@@ -16,7 +16,7 @@ export function Concept({ config }: ConceptProps) {
           className="relative aspect-square bg-emerald-deep/5 p-4 rounded-3xl overflow-hidden"
         >
            <img 
-            src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=1000&auto=format&fit=crop" 
+            src={config?.conceptImageUrl || "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=1000&auto=format&fit=crop"} 
             alt="Classic Calligraphy" 
             className="w-full h-full object-cover rounded-2xl grayscale transition-all duration-700 hover:grayscale-0"
             referrerPolicy="no-referrer"
