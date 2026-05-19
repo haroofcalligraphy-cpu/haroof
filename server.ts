@@ -4,6 +4,7 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { put } from "@vercel/blob";
 import multer from "multer";
+import cors from "cors";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -11,18 +12,29 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  app.use(cors());
+  
+  // Simple request logger
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
+  });
+
   // Health check endpoint
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", env: process.env.NODE_ENV });
   });
 
   // Add API upload route
-  app.post("/api/upload", (req, res, next) => {
-    console.log("POST /api/upload request received");
+  app.all("/api/upload", (req, res, next) => {
+    if (req.method !== "POST") {
+      console.warn(`Method ${req.method} not allowed for /api/upload`);
+      return res.status(405).json({ error: `Method ${req.method} not allowed. Use POST.` });
+    }
     next();
   }, upload.single("file"), async (req, res) => {
     try {
-      console.log("Multer finished processing file");
+      console.log("Processing upload request...");
       const token = (process.env.BLOB_READ_WRITE_TOKEN || "").trim().replace(/^["']|["']$/g, '');
       
       if (!token) {
