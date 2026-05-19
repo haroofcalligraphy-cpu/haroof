@@ -107,7 +107,7 @@ export function Gallery({ onSelectTemplate }: GalleryProps) {
                   <div className="text-center mt-6">
                     <h3 className="text-lg font-serif tracking-wide text-emerald-deep mb-1">{template.name}</h3>
                     <p className="text-[10px] uppercase tracking-widest text-emerald-deep/60">
-                      Starting at ${template.price || '149'}
+                      Starting at ₹{template.price || '149'}
                     </p>
                   </div>
                 </motion.div>

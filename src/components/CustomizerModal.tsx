@@ -22,7 +22,7 @@ export function CustomizerModal({ template, config, onClose }: CustomizerModalPr
       `*Category:* ${template.category}\n` +
       `*Name for Frame:* ${frameName}\n` +
       `*Specific Requirements:* ${requirements || 'None'}\n` +
-      `*Starting Price:* ${template.price || 149}\n\n` +
+      `*Starting Price:* ₹${template.price || 149}\n\n` +
       `*Design Preview:* ${template.imageUrl}`
     );
 
@@ -39,7 +39,7 @@ export function CustomizerModal({ template, config, onClose }: CustomizerModalPr
       `Template: ${template.name}\n` +
       `Name for Frame: ${frameName}\n` +
       `Requirements: ${requirements}\n` +
-      `Base Price: ${template.price}\n\n` +
+      `Base Price: ₹${template.price}\n\n` +
       `Image Link: ${template.imageUrl}`
     );
     const orderEmail = config?.orderEmail || "order@huroof.com";
@@ -89,7 +89,7 @@ export function CustomizerModal({ template, config, onClose }: CustomizerModalPr
               <span className="text-xs uppercase tracking-[0.3em] gold-text font-bold mb-4 block">Bespoke Customizer</span>
               <h2 className="text-4xl font-serif text-emerald-deep mb-2">{template.name}</h2>
               <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-emerald-deep/50">
-                Starting at ${template.price || '149'}
+                Starting at ₹{template.price || '149'}
               </p>
             </div>
 

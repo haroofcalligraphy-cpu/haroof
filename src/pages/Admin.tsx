@@ -372,7 +372,7 @@ export default function Admin() {
                   <div className="flex-1">
                     <span className="text-[10px] uppercase tracking-widest gold-text font-bold mb-2 block">{template.category}</span>
                     <h3 className="text-lg font-serif text-emerald-deep mb-1">{template.name}</h3>
-                    <p className="text-sm font-light text-ink/60 italic">Starting at ${template.price}</p>
+                    <p className="text-sm font-light text-ink/60 italic">Starting at ₹{template.price}</p>
                   </div>
                 </motion.div>
               ))}
