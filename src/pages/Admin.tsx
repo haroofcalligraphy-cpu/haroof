@@ -123,8 +123,19 @@ export default function Admin() {
       });
 
       if (!uploadRes.ok) {
-        const errorData = await uploadRes.json().catch(() => ({}));
-        let errorMessage = errorData.error || `Upload failed with status ${uploadRes.status}`;
+        let errorMessage = `Upload failed with status ${uploadRes.status}`;
+        try {
+          const contentType = uploadRes.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await uploadRes.json();
+            errorMessage = data.error || errorMessage;
+          } else {
+            const text = await uploadRes.text();
+            errorMessage = `Server Error (${uploadRes.status}): ${text.slice(0, 100)}`;
+          }
+        } catch (e) {
+          console.error("Error parsing error response:", e);
+        }
         
         if (errorMessage.includes("token is missing")) {
           errorMessage = "Vercel Blob token is missing. Please go to Settings -> Secrets in AI Studio and add BLOB_READ_WRITE_TOKEN.";
@@ -133,7 +144,14 @@ export default function Admin() {
         throw new Error(errorMessage);
       }
       
-      const responseData = await uploadRes.json();
+      const responseText = await uploadRes.text();
+      let responseData;
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (e) {
+        console.error("Failed to parse success response as JSON:", responseText);
+        throw new Error("Invalid response format from server");
+      }
       const imageUrl = responseData.url;
       console.log("Upload successful, received URL:", imageUrl);
 

@@ -23,7 +23,8 @@ async function startServer() {
   }, upload.single("file"), async (req, res) => {
     try {
       console.log("Multer finished processing file");
-      const token = process.env.BLOB_READ_WRITE_TOKEN?.trim().replace(/^["']|["']$/g, '');
+      const token = (process.env.BLOB_READ_WRITE_TOKEN || "").trim().replace(/^["']|["']$/g, '');
+      
       if (!token) {
         console.error("Upload failed: BLOB_READ_WRITE_TOKEN is missing or empty");
         return res.status(500).json({ error: "Vercel Blob token is missing. Please add BLOB_READ_WRITE_TOKEN to your secrets in AI Studio." });
@@ -55,7 +56,8 @@ async function startServer() {
 
   app.post("/api/delete", express.json(), async (req, res) => {
     try {
-      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      const token = (process.env.BLOB_READ_WRITE_TOKEN || "").trim().replace(/^["']|["']$/g, '');
+      if (!token) {
         return res.status(500).json({ error: "Vercel Blob token (BLOB_READ_WRITE_TOKEN) is not configured." });
       }
 
@@ -66,7 +68,7 @@ async function startServer() {
       
       const { del } = await import("@vercel/blob");
       await del(url, {
-        token: process.env.BLOB_READ_WRITE_TOKEN,
+        token: token,
       });
       
       res.json({ success: true });
@@ -74,6 +76,18 @@ async function startServer() {
       console.error("Delete error:", error);
       res.status(500).json({ error: "Delete failed" });
     }
+  });
+
+  // Global API error handler
+  app.use((err: any, req: any, res: any, next: any) => {
+    if (req.path.startsWith('/api')) {
+      console.error("API error caught by middleware:", err);
+      return res.status(err.status || 500).json({ 
+        error: err.message || "Internal Server Error",
+        details: err.code
+      });
+    }
+    next(err);
   });
 
   // Vite middleware for development
