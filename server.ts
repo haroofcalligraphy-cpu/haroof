@@ -13,6 +13,10 @@ async function startServer() {
   // Add API upload route
   app.post("/api/upload", upload.single("file"), async (req, res) => {
     try {
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        return res.status(500).json({ error: "Vercel Blob token (BLOB_READ_WRITE_TOKEN) is not configured in environment variables." });
+      }
+
       const file = req.file;
       if (!file) {
         return res.status(400).json({ error: "No file uploaded" });
@@ -24,14 +28,19 @@ async function startServer() {
       });
 
       res.json({ url });
-    } catch (error) {
-      console.error("Upload error:", error);
-      res.status(500).json({ error: "Upload failed" });
+    } catch (error: any) {
+      console.error("Upload error details:", error);
+      const message = error?.message || "Internal server error during upload";
+      res.status(500).json({ error: message });
     }
   });
 
   app.post("/api/delete", express.json(), async (req, res) => {
     try {
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        return res.status(500).json({ error: "Vercel Blob token (BLOB_READ_WRITE_TOKEN) is not configured." });
+      }
+
       const { url } = req.body;
       if (!url) {
         return res.status(400).json({ error: "URL is required" });

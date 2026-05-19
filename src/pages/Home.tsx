@@ -16,7 +16,19 @@ export default function Home() {
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(db, "config", "site"), (snapshot) => {
       if (snapshot.exists()) {
-        setConfig(snapshot.data() as SiteConfig);
+        const data = snapshot.data() as SiteConfig;
+        setConfig(data);
+        
+        // Dynamic Favicon
+        if (data.faviconUrl) {
+          let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.getElementsByTagName('head')[0].appendChild(link);
+          }
+          link.href = data.faviconUrl;
+        }
       }
     });
     return () => unsubscribe();
@@ -24,7 +36,7 @@ export default function Home() {
 
   return (
     <div className="bordered-container bg-stone">
-      <Header />
+      <Header config={config} />
       <main>
         <Hero config={config} />
         <Concept config={config} />

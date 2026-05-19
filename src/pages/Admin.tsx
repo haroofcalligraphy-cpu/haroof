@@ -111,30 +111,38 @@ export default function Admin() {
     }
   };
 
+  const uploadImage = async (file: File, oldUrl?: string): Promise<string> => {
+    // 1. Cleanup old image if it exists
+    if (oldUrl && oldUrl.includes("public.blob.vercel-storage.com")) {
+      await fetch("/api/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: oldUrl }),
+      }).catch(err => console.warn("Blob deletion hint:", err));
+    }
+
+    // 2. Upload new image
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Upload failed");
+    }
+    
+    const { url } = await response.json();
+    return url;
+  };
+
   const handleConceptImageUpload = async (file: File) => {
     setLoading(true);
     try {
-      // 1. Cleanup old image if it exists
-      if (config.conceptImageUrl && config.conceptImageUrl.includes("public.blob.vercel-storage.com")) {
-        await fetch("/api/delete", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: config.conceptImageUrl }),
-        }).catch(err => console.warn("Blob deletion hint:", err));
-      }
-
-      // 2. Upload new image
-      const formData = new FormData();
-      formData.append("file", file);
-      
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("Upload failed");
-      
-      const { url } = await response.json();
+      const url = await uploadImage(file, config.conceptImageUrl);
       setConfig({ ...config, conceptImageUrl: url });
       alert("Concept image uploaded! Remember to save settings.");
     } catch (err) {
@@ -148,32 +156,38 @@ export default function Admin() {
   const handleHeroImageUpload = async (file: File) => {
     setLoading(true);
     try {
-      // 1. Cleanup old image if it exists
-      if (config.heroImageUrl && config.heroImageUrl.includes("public.blob.vercel-storage.com")) {
-        await fetch("/api/delete", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: config.heroImageUrl }),
-        }).catch(err => console.warn("Blob deletion hint:", err));
-      }
-
-      // 2. Upload new image
-      const formData = new FormData();
-      formData.append("file", file);
-      
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("Upload failed");
-      
-      const { url } = await response.json();
+      const url = await uploadImage(file, config.heroImageUrl);
       setConfig({ ...config, heroImageUrl: url });
       alert("Hero background uploaded! Remember to save settings.");
     } catch (err) {
       console.error("Hero upload error:", err);
       alert(`Hero upload failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogoUpload = async (file: File) => {
+    setLoading(true);
+    try {
+      const url = await uploadImage(file, config.logoUrl);
+      setConfig({ ...config, logoUrl: url });
+      alert("Logo uploaded! Remember to save settings.");
+    } catch (err) {
+      alert(`Logo upload failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFaviconUpload = async (file: File) => {
+    setLoading(true);
+    try {
+      const url = await uploadImage(file, config.faviconUrl);
+      setConfig({ ...config, faviconUrl: url });
+      alert("Favicon uploaded! Remember to save settings.");
+    } catch (err) {
+      alert(`Favicon upload failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setLoading(false);
     }
@@ -202,7 +216,10 @@ export default function Admin() {
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Upload failed");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Upload failed");
+      }
       const { url } = await response.json();
 
       // 2. Save metadata to Firestore
@@ -322,6 +339,32 @@ export default function Admin() {
             {config && (
               <form onSubmit={handleSaveConfig} className="space-y-6">
                 <div>
+                  <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Logo (Header/Footer)</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-xl bg-emerald-deep/5 overflow-hidden border border-gold/20 shrink-0 p-2">
+                      {config.logoUrl ? (
+                        <img src={config.logoUrl} className="w-full h-full object-contain" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-emerald-deep/20 font-serif text-xs">
+                          LOGO
+                        </div>
+                      )}
+                    </div>
+                    <label className="flex-1 px-4 py-2 border border-gold/30 rounded-xl text-xs font-bold text-emerald-deep cursor-pointer hover:bg-gold/5 transition-all text-center">
+                      Change Logo
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleLogoUpload(file);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+                <div>
                   <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Hero Title</label>
                   <input 
                     type="text"
@@ -393,6 +436,32 @@ export default function Admin() {
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) handleConceptImageUpload(file);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Site Favicon</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-emerald-deep/5 overflow-hidden border border-gold/20 shrink-0 flex items-center justify-center">
+                      {config.faviconUrl ? (
+                        <img src={config.faviconUrl} className="w-full h-full object-contain" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-emerald-deep/20">
+                          <ImageIcon size={14} />
+                        </div>
+                      )}
+                    </div>
+                    <label className="flex-1 px-4 py-2 border border-gold/30 rounded-xl text-xs font-bold text-emerald-deep cursor-pointer hover:bg-gold/5 transition-all text-center">
+                      Change Favicon
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFaviconUpload(file);
                         }}
                       />
                     </label>

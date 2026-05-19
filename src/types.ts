@@ -18,6 +18,8 @@ export interface SiteConfig {
   conceptText: string;
   conceptImageUrl?: string;
   heroImageUrl?: string;
+  logoUrl?: string;
+  faviconUrl?: string;
   whatsappNumber: string;
   orderEmail: string;
 }

@@ -10,8 +10,15 @@ export function Footer({ config }: FooterProps) {
   return (
     <footer id="footer" className="bg-emerald-deep text-stone py-12 px-12 border-t-[12px] border-emerald-deep">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-        <div className="text-[10px] uppercase tracking-[0.2em] opacity-60">
-          &copy; {new Date().getFullYear()} HUROOF ART COLLECTIVE. ALL RIGHTS RESERVED. — CRAFTED BY FAISAL
+        <div className="flex flex-col items-center md:items-start gap-4">
+          {config?.logoUrl ? (
+            <img src={config.logoUrl} alt="HUROOF" className="h-8 w-auto brightness-0 invert opacity-60" referrerPolicy="no-referrer" />
+          ) : (
+            <div className="text-xl font-serif tracking-widest opacity-60">HUROOF</div>
+          )}
+          <div className="text-[10px] uppercase tracking-[0.2em] opacity-60">
+            &copy; {new Date().getFullYear()} HUROOF ART COLLECTIVE. ALL RIGHTS RESERVED. — CRAFTED BY FAISAL
+          </div>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-6">

@@ -2,8 +2,13 @@ import { motion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { SiteConfig } from "@/src/types";
 
-export function Header() {
+interface HeaderProps {
+  config: SiteConfig | null;
+}
+
+export function Header({ config }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
   const navigate = useNavigate();
@@ -32,9 +37,13 @@ export function Header() {
           onClick={handleLogoClick}
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-5xl font-serif tracking-[0.1em] text-emerald-deep font-medium cursor-pointer select-none active:scale-95 transition-transform"
+          className="cursor-pointer select-none active:scale-95 transition-transform"
         >
-          HUROOF
+          {config?.logoUrl ? (
+            <img src={config.logoUrl} alt="HUROOF" className="h-12 md:h-16 w-auto object-contain" referrerPolicy="no-referrer" />
+          ) : (
+            <span className="text-4xl md:text-5xl font-serif tracking-[0.1em] text-emerald-deep font-medium">HUROOF</span>
+          )}
         </motion.div>
 
         <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-[0.2em] font-semibold text-emerald-deep/60">
