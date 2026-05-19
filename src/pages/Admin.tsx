@@ -50,6 +50,7 @@ export default function Admin() {
           heroSubtitle: "Preserve memories, love, and faith through timeless premium calligraphy gift frames.",
           conceptText: "In a world of mass production, HAROOF stands for the sacred beauty of the written word...",
           conceptImageUrl: "",
+          heroImageUrl: "",
           // @ts-ignore
           whatsappNumber: (import.meta as any).env.VITE_WHATSAPP_NUMBER || "",
           // @ts-ignore
@@ -121,6 +122,22 @@ export default function Admin() {
     } catch (err) {
       console.error("Config upload error:", err);
       alert(`Config upload failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleHeroImageUpload = async (file: File) => {
+    setLoading(true);
+    try {
+      const storageRef = ref(storage, `site/hero_${Date.now()}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      setConfig({ ...config, heroImageUrl: url });
+      alert("Hero background uploaded! Remember to save settings.");
+    } catch (err) {
+      console.error("Hero upload error:", err);
+      alert(`Hero upload failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setLoading(false);
     }
@@ -253,6 +270,32 @@ export default function Admin() {
                     value={config.heroTitle}
                     onChange={(e) => setConfig({...config, heroTitle: e.target.value})}
                   />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Hero Background Image</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-xl bg-emerald-deep/5 overflow-hidden border border-gold/20 shrink-0">
+                      {config.heroImageUrl ? (
+                        <img src={config.heroImageUrl} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-emerald-deep/20">
+                          <ImageIcon size={20} />
+                        </div>
+                      )}
+                    </div>
+                    <label className="flex-1 px-4 py-2 border border-gold/30 rounded-xl text-xs font-bold text-emerald-deep cursor-pointer hover:bg-gold/5 transition-all text-center">
+                      Change Hero Background
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleHeroImageUpload(file);
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest font-bold mb-3 text-emerald-deep/50">Hero Subtitle</label>

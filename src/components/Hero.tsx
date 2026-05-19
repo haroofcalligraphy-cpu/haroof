@@ -7,7 +7,18 @@ interface HeroProps {
 
 export function Hero({ config }: HeroProps) {
   return (
-    <section id="home" className="relative pt-24 pb-12 flex items-center justify-center overflow-hidden">
+    <section id="home" className="relative pt-24 pb-12 flex items-center justify-center overflow-hidden min-h-[60vh] md:min-h-[80vh]">
+      {config?.heroImageUrl && (
+        <div className="absolute inset-0 z-0">
+          <img 
+            src={config.heroImageUrl} 
+            className="w-full h-full object-cover opacity-10 grayscale" 
+            alt="Hero Background"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-stone/60 backdrop-blur-[2px]" />
+        </div>
+      )}
       <div className="relative z-10 text-center px-12 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

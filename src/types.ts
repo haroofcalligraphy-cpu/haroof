@@ -16,6 +16,7 @@ export interface SiteConfig {
   heroSubtitle: string;
   conceptText: string;
   conceptImageUrl?: string;
+  heroImageUrl?: string;
   whatsappNumber: string;
   orderEmail: string;
 }

@@ -25,6 +25,7 @@
         "heroSubtitle": { "type": "string" },
         "conceptText": { "type": "string" },
         "conceptImageUrl": { "type": "string", "format": "uri" },
+        "heroImageUrl": { "type": "string", "format": "uri" },
         "whatsappNumber": { "type": "string" },
         "orderEmail": { "type": "string" }
       }
