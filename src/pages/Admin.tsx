@@ -100,25 +100,31 @@ export default function Admin() {
 
     try {
       // 1. Optimize Image
+      console.log("Starting image compression...");
       const options = {
         maxSizeMB: 0.8,
         maxWidthOrHeight: 1200,
         useWebWorker: true
       };
       const compressedFile = await imageCompression(imageFile, options);
+      console.log("Compression done:", compressedFile.size, "bytes");
 
       // 2. Upload to Vercel Blob via API
       const formData = new FormData();
       formData.append("file", compressedFile);
 
+      console.log("Sending fetch request to /api/upload...");
       const uploadRes = await fetch("/api/upload", {
         method: "POST",
         body: formData,
+      }).catch(err => {
+        console.error("Fetch call specifically failed:", err);
+        throw new Error(`Connection failed: ${err.message}. The server might be restarting or unreachable.`);
       });
 
       if (!uploadRes.ok) {
         const errorData = await uploadRes.json().catch(() => ({}));
-        let errorMessage = errorData.error || "Image upload failed";
+        let errorMessage = errorData.error || `Upload failed with status ${uploadRes.status}`;
         
         if (errorMessage.includes("token is missing")) {
           errorMessage = "Vercel Blob token is missing. Please go to Settings -> Secrets in AI Studio and add BLOB_READ_WRITE_TOKEN.";
@@ -127,7 +133,9 @@ export default function Admin() {
         throw new Error(errorMessage);
       }
       
-      const { url: imageUrl } = await uploadRes.json();
+      const responseData = await uploadRes.json();
+      const imageUrl = responseData.url;
+      console.log("Upload successful, received URL:", imageUrl);
 
       // 3. Save to Firestore
       const newTemplate = {

@@ -11,9 +11,18 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", env: process.env.NODE_ENV });
+  });
+
   // Add API upload route
-  app.post("/api/upload", upload.single("file"), async (req, res) => {
+  app.post("/api/upload", (req, res, next) => {
+    console.log("POST /api/upload request received");
+    next();
+  }, upload.single("file"), async (req, res) => {
     try {
+      console.log("Multer finished processing file");
       const token = process.env.BLOB_READ_WRITE_TOKEN?.trim().replace(/^["']|["']$/g, '');
       if (!token) {
         console.error("Upload failed: BLOB_READ_WRITE_TOKEN is missing or empty");
@@ -84,6 +93,14 @@ async function startServer() {
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
+  });
+
+  process.on("uncaughtException", (err) => {
+    console.error("Uncaught Exception:", err);
+  });
+
+  process.on("unhandledRejection", (reason, promise) => {
+    console.error("Unhandled Rejection at:", promise, "reason:", reason);
   });
 }
 
