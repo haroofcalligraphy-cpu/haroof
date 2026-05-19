@@ -101,14 +101,14 @@ export function CustomizerModal({ template, config, onClose }: CustomizerModalPr
           </div>
 
           {/* Right: Customization Form */}
-          <div className="w-full lg:w-[55%] p-8 md:p-12 lg:p-16 overflow-y-auto bg-white/50 backdrop-blur-sm">
+          <div className="w-full lg:w-[55%] p-8 md:p-12 lg:p-16 overflow-y-auto bg-white/80 backdrop-blur-md">
             <div className="mb-10">
               <div className="flex items-center gap-3 mb-4">
                 <span className="w-8 h-[1px] bg-gold" />
                 <span className="text-[10px] uppercase tracking-[0.4em] gold-text font-black">Option 1: Complete Web Form</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-serif text-emerald-deep mb-2">{template.name}</h2>
-              <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-emerald-deep/40">
+              <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-emerald-deep/50">
                 Custom Calligraphy Design • Starting at ₹{template.price || '149'}
               </p>
             </div>
@@ -116,27 +116,27 @@ export function CustomizerModal({ template, config, onClose }: CustomizerModalPr
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="relative">
-                  <label className="block text-[9px] uppercase tracking-[0.2em] font-black mb-2 text-emerald-deep/60">
+                  <label className="block text-[10px] uppercase tracking-[0.2em] font-black mb-2 text-emerald-deep/80">
                     Your Name *
                   </label>
                   <input 
                     type="text"
                     required
                     placeholder="Enter your full name"
-                    className="w-full px-0 py-3 bg-transparent border-b border-emerald-deep/10 focus:border-gold outline-none text-base transition-all placeholder:text-ink/10 font-sans"
+                    className="w-full px-0 py-3 bg-transparent border-b-2 border-emerald-deep/20 focus:border-gold outline-none text-base transition-all placeholder:text-ink/30 font-sans"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                   />
                 </div>
                 <div className="relative">
-                  <label className="block text-[9px] uppercase tracking-[0.2em] font-black mb-2 text-emerald-deep/60">
+                  <label className="block text-[10px] uppercase tracking-[0.2em] font-black mb-2 text-emerald-deep/80">
                     Contact Details (WhatsApp/Email) *
                   </label>
                   <input 
                     type="text"
                     required
-                    placeholder="Where can we reach you?"
-                    className="w-full px-0 py-3 bg-transparent border-b border-emerald-deep/10 focus:border-gold outline-none text-base transition-all placeholder:text-ink/10 font-sans"
+                    placeholder="Mobile number or Email"
+                    className="w-full px-0 py-3 bg-transparent border-b-2 border-emerald-deep/20 focus:border-gold outline-none text-base transition-all placeholder:text-ink/30 font-sans"
                     value={customerContact}
                     onChange={(e) => setCustomerContact(e.target.value)}
                   />
@@ -144,27 +144,27 @@ export function CustomizerModal({ template, config, onClose }: CustomizerModalPr
               </div>
 
               <div className="relative">
-                <label className="block text-[9px] uppercase tracking-[0.2em] font-black mb-2 text-emerald-deep/60">
+                <label className="block text-[10px] uppercase tracking-[0.2em] font-black mb-2 text-emerald-deep/80">
                   Text to add in Frame *
                 </label>
                 <input 
                   type="text"
                   required
                   placeholder="e.g., The name or quote you want written"
-                  className="w-full px-0 py-4 bg-transparent border-b border-emerald-deep/10 focus:border-gold outline-none text-xl transition-all placeholder:text-ink/10 font-serif"
+                  className="w-full px-0 py-4 bg-transparent border-b-2 border-emerald-deep/20 focus:border-gold outline-none text-xl transition-all placeholder:text-ink/30 font-serif"
                   value={frameName}
                   onChange={(e) => setFrameName(e.target.value)}
                 />
               </div>
 
               <div className="relative">
-                <label className="block text-[9px] uppercase tracking-[0.2em] font-black mb-2 text-emerald-deep/60">
+                <label className="block text-[10px] uppercase tracking-[0.2em] font-black mb-2 text-emerald-deep/80">
                   Additional Requirements
                 </label>
                 <textarea 
                   rows={2}
                   placeholder="Color preferences, frame size, or specific gift instructions..."
-                  className="w-full px-0 py-3 bg-transparent border-b border-emerald-deep/10 focus:border-gold outline-none text-base transition-all resize-none placeholder:text-ink/10 font-light"
+                  className="w-full px-0 py-3 bg-transparent border-b-2 border-emerald-deep/20 focus:border-gold outline-none text-base transition-all resize-none placeholder:text-ink/30 font-light"
                   value={requirements}
                   onChange={(e) => setRequirements(e.target.value)}
                 />
