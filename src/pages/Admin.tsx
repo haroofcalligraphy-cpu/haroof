@@ -116,7 +116,11 @@ export default function Admin() {
         body: formData,
       });
 
-      if (!uploadRes.ok) throw new Error("Image upload failed");
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json().catch(() => ({}));
+        throw new Error(errorData.error || "Image upload failed");
+      }
+      
       const { url: imageUrl } = await uploadRes.json();
 
       // 3. Save to Firestore
