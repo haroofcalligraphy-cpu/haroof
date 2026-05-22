@@ -43,8 +43,14 @@ export function Footer({ config }: FooterProps) {
             <div className="flex flex-col gap-3 w-full max-w-[240px]">
               <button 
                 onClick={() => {
-                  // @ts-ignore
-                  const rawNumber = config?.whatsappNumber || (import.meta as any).env.VITE_WHATSAPP_NUMBER || "";
+                  const configNum = config?.whatsappNumber ? config.whatsappNumber.trim() : "";
+                  const envNum = (import.meta as any).env.VITE_WHATSAPP_NUMBER || "";
+                  let rawNumber = "+91 95411 20459";
+                  if (configNum && configNum !== "0000000000") {
+                    rawNumber = configNum;
+                  } else if (envNum && envNum.trim() !== "") {
+                    rawNumber = envNum;
+                  }
                   const whatsappNumber = rawNumber.replace(/\D/g, "");
                   window.open(`https://wa.me/${whatsappNumber}`, "_blank");
                 }}
@@ -54,8 +60,17 @@ export function Footer({ config }: FooterProps) {
                 WhatsApp Order
               </button>
               <button 
-                // @ts-ignore
-                onClick={() => window.location.href = `mailto:${config?.orderEmail || (import.meta as any).env.VITE_ORDER_EMAIL}`}
+                onClick={() => {
+                  const configEmail = config?.orderEmail ? config.orderEmail.trim() : "";
+                  const envEmail = (import.meta as any).env.VITE_ORDER_EMAIL || "";
+                  let rawEmail = "haroofcalligraphy@gmail.com";
+                  if (configEmail && configEmail !== "order@huroof.com") {
+                    rawEmail = configEmail;
+                  } else if (envEmail && envEmail.trim() !== "") {
+                    rawEmail = envEmail;
+                  }
+                  window.location.href = `mailto:${rawEmail}`;
+                }}
                 className="flex items-center justify-center gap-3 px-6 py-3 border border-gold/30 text-[10px] uppercase tracking-[0.2em] hover:bg-stone hover:text-emerald-deep transition-all font-bold w-full"
               >
                 <Mail size={12} />

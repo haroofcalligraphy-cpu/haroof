@@ -17,6 +17,17 @@ export function CustomizerModal({ template, config, onClose }: CustomizerModalPr
 
   if (!template) return null;
 
+  // Dynamically resolve target phone number
+  const configNum = config?.whatsappNumber ? config.whatsappNumber.trim() : "";
+  const envNum = (import.meta as any).env.VITE_WHATSAPP_NUMBER || "";
+  let rawNumber = "+91 95411 20459";
+  if (configNum && configNum !== "0000000000") {
+    rawNumber = configNum;
+  } else if (envNum && envNum.trim() !== "") {
+    rawNumber = envNum;
+  }
+  const cleanNumber = rawNumber.replace(/\D/g, "");
+
   const handleWhatsApp = () => {
     const text = encodeURIComponent(
       `*New Order Inquiry from HUROOF*\n\n` +
@@ -30,8 +41,7 @@ export function CustomizerModal({ template, config, onClose }: CustomizerModalPr
       `*Design Preview:* ${template.imageUrl}`
     );
 
-    const targetNumber = "919541120459";
-    const whatsappUrl = `https://wa.me/${targetNumber}?text=${text}`;
+    const whatsappUrl = `https://wa.me/${cleanNumber}?text=${text}`;
     window.open(whatsappUrl, "_blank");
   };
 
@@ -39,8 +49,7 @@ export function CustomizerModal({ template, config, onClose }: CustomizerModalPr
     const text = encodeURIComponent(
       `Hi HUROOF! I'm interested in the "${template.name}" design. Can you help me customize it?`
     );
-    const targetNumber = "919541120459";
-    const whatsappUrl = `https://wa.me/${targetNumber}?text=${text}`;
+    const whatsappUrl = `https://wa.me/${cleanNumber}?text=${text}`;
     window.open(whatsappUrl, "_blank");
   };
 

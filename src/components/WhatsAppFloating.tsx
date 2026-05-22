@@ -7,12 +7,16 @@ interface WhatsAppFloatingProps {
 }
 
 export function WhatsAppFloating({ config }: WhatsAppFloatingProps) {
-  // Try to use config number, but if it is empty, generic placeholder, or null, fallback to the env variable
-  const rawNumber = config?.whatsappNumber && config.whatsappNumber !== "0000000000" && config.whatsappNumber.trim() !== ""
-    ? config.whatsappNumber 
-    : ((import.meta as any).env.VITE_WHATSAPP_NUMBER || "");
-
-  if (!rawNumber) return null;
+  // Use config number, or fallback to env variable, or the robust default number
+  const configNum = config?.whatsappNumber ? config.whatsappNumber.trim() : "";
+  const envNum = (import.meta as any).env.VITE_WHATSAPP_NUMBER || "";
+  
+  let rawNumber = "+91 95411 20459";
+  if (configNum && configNum !== "0000000000") {
+    rawNumber = configNum;
+  } else if (envNum && envNum.trim() !== "") {
+    rawNumber = envNum;
+  }
 
   // Remove any non-numeric characters from the phone number
   const cleanNumber = rawNumber.replace(/\D/g, "");
