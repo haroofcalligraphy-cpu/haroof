@@ -7,10 +7,15 @@ interface WhatsAppFloatingProps {
 }
 
 export function WhatsAppFloating({ config }: WhatsAppFloatingProps) {
-  if (!config?.whatsappNumber) return null;
+  // Try to use config number, but if it is empty, generic placeholder, or null, fallback to the env variable
+  const rawNumber = config?.whatsappNumber && config.whatsappNumber !== "0000000000" && config.whatsappNumber.trim() !== ""
+    ? config.whatsappNumber 
+    : ((import.meta as any).env.VITE_WHATSAPP_NUMBER || "");
+
+  if (!rawNumber) return null;
 
   // Remove any non-numeric characters from the phone number
-  const cleanNumber = config.whatsappNumber.replace(/\D/g, "");
+  const cleanNumber = rawNumber.replace(/\D/g, "");
   const whatsappUrl = `https://wa.me/${cleanNumber}`;
 
   return (

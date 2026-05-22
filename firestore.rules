@@ -1,7 +1,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper functions
+    // Basic helpers
     function isSignedIn() {
       return request.auth != null;
     }
@@ -10,16 +10,33 @@ service cloud.firestore {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    function isValidTemplate(data) {
-      return data.keys().hasAll(['name', 'category', 'imageUrl', 'createdAt']) &&
-             data.name is string && data.name.size() <= 200 &&
-             data.category in ['Islamic', 'Name', 'Wedding'] &&
-             data.imageUrl is string && data.imageUrl.size() <= 2000;
+    function incoming() {
+      return request.resource.data;
     }
 
     function isAdmin() {
       return isSignedIn() && 
-             request.auth.token.email == 'haroofcalligraphy@gmail.com';
+             request.auth.token.email == 'haroofcalligraphy@gmail.com' &&
+             request.auth.token.email_verified == true;
+    }
+
+    // Validation Blueprints
+    function isValidTemplate(data) {
+      return data.keys().hasAll(['name', 'category', 'imageUrl', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
+             data.category in ['Islamic', 'Name', 'Wedding'] &&
+             data.imageUrl is string && data.imageUrl.size() > 0 && data.imageUrl.size() <= 2000 &&
+             data.createdAt is number;
+    }
+
+    function isValidConfig(data) {
+      return data.size() <= 20; // Bound the config size
+    }
+
+    function isValidWorkImage(data) {
+      return data.keys().hasAll(['imageUrl', 'createdAt']) &&
+             data.imageUrl is string && data.imageUrl.size() > 0 && data.imageUrl.size() <= 2000 &&
+             data.createdAt is number;
     }
 
     // Default deny
@@ -27,22 +44,26 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Templates collection
+    // Collections
     match /templates/{templateId} {
-      allow read: if true; // Publicly viewable
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow create: if isAdmin() && isValidTemplate(incoming());
+      allow update: if isAdmin() && isValidTemplate(incoming());
+      allow delete: if isAdmin();
     }
 
-    // Config collection
     match /config/{configId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isAdmin() && isValidConfig(incoming());
+      allow update: if isAdmin() && isValidConfig(incoming());
+      allow delete: if isAdmin();
     }
 
-    // Work Gallery collection
     match /workGallery/{imageId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isAdmin() && isValidWorkImage(incoming());
+      allow update: if isAdmin() && isValidWorkImage(incoming());
+      allow delete: if isAdmin();
     }
   }
 }
